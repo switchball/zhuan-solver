@@ -3,7 +3,7 @@ from state.node import Node
 
 
 class ZhuanNode(Node):
-    def __init__(self, board_state, from_action=None):
+    def __init__(self, board_state: BoardState, from_action=None):
         self.state = board_state
         self.from_action = from_action
 
@@ -24,8 +24,20 @@ class ZhuanNode(Node):
         
         :return: 返回一个包含 (邻居节点, 动作) 的列表
         """
-        return []
-        raise NotImplementedError("get_neighbors 方法需要在子类中实现")
+        neighbors_with_actions = []
+        state_set = set()
+        all_moves = self.state.available_moves()
+        for start, end, search_dir_key in all_moves:
+            new_state = self.state.apply_move_copy(start, end, search_dir_key)
+            # new state 判重
+            new_board_state = BoardState(new_state)
+            if new_board_state not in state_set:
+                state_set.add(new_board_state)
+                neighbors_with_actions.append(
+                    (ZhuanNode(new_board_state, (start, end, search_dir_key)), (start, end, search_dir_key))
+                )
+
+        return neighbors_with_actions
 
     def get_priority(self):
         """
@@ -33,13 +45,10 @@ class ZhuanNode(Node):
         
         :return: 返回节点的优先级值，数值越小优先级越高
         """
-        return 0
+        return -self.state.elimated_tiles()
 
     def __eq__(self, other):
         return self.state == other.state
 
     def __hash__(self):
         return hash(self.state)
-
-    def __lt__(self, other):
-        return self.state< other.state

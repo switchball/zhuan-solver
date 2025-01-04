@@ -47,7 +47,7 @@ class Node:
     def __repr__(self):
         """返回节点的字符串表示形式，便于调试和打印"""
         action_str = f" via {self.from_action}" if self.from_action else ""
-        return f"Node({self.state}{action_str})"
+        return f"Node(\n{self.state}{action_str})"
 
     def __lt__(self, other):
         """重载小于运算符，用于优先队列中的比较"""

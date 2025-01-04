@@ -77,10 +77,10 @@ class GBFS:
         parent_map = {self.start_node: (None, None)}
 
         while priority_queue:
-            print("PQ", priority_queue)
-            _, current_node = heapq.heappop(priority_queue)
+            _priority, current_node = heapq.heappop(priority_queue)
 
             if current_node.is_goal():
+                self._stats_visited_state = len(visited)
                 return self._reconstruct_path(current_node, parent_map)
 
             if current_node in visited:
@@ -93,6 +93,8 @@ class GBFS:
                 if neighbor not in visited and neighbor not in parent_map:
                     parent_map[neighbor] = (current_node, action)
                     heapq.heappush(priority_queue, (neighbor.get_priority(), neighbor))
+
+        self._stats_visited_state = len(visited)
 
         return None
 
@@ -113,3 +115,6 @@ class GBFS:
                 path[-1].from_action = action  # 更新路径中每个节点的来源动作
         path.reverse()
         return path
+
+    def show_algorithm_stats(self):
+        print("visited state num:", self._stats_visited_state)
