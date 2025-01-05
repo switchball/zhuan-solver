@@ -1,9 +1,13 @@
 import numpy as np
 import random
 
+from PIL import Image
+
 from app.zhuan.board_state import BoardState
 from app.zhuan.zhuan_node import ZhuanNode
 from state.search import BFS, GBFS
+from app.zhuan.yolo_recognizer import YOLORecognizer
+
 
 def random_state():
     # 生成 [1, 2, ..., 10] * 4
@@ -23,6 +27,11 @@ def random_state():
     result = np.array(base_list).reshape(14, 10)
     
     return result
+
+def from_image_state():
+    rec = YOLORecognizer('runs/classify/train/weights/best.pt')
+    full_image = Image.open("images/image.png")
+    return rec.recognize(full_image)
 
 if __name__ == "__main__":
     initial_state = [
@@ -44,6 +53,8 @@ if __name__ == "__main__":
     ]
 
     initial_state = random_state()
+
+    initial_state = from_image_state()
     
     # neighbors = test_node.get_neighbors()
 
