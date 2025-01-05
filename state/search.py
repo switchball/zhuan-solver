@@ -1,4 +1,5 @@
 import heapq
+import time
 from collections import deque
 
 
@@ -72,6 +73,7 @@ class GBFS:
         
         :return: 如果找到目标节点，返回路径；如果未找到，返回 None
         """
+        tic = time.time()
         priority_queue = [(self.start_node.get_priority(), self.start_node)]
         visited = set()
         parent_map = {self.start_node: (None, None)}
@@ -81,6 +83,8 @@ class GBFS:
 
             if current_node.is_goal():
                 self._stats_visited_state = len(visited)
+                self._stats_num_in_queue = len(priority_queue)
+                self._stats_elasped_time = time.time() - tic
                 return self._reconstruct_path(current_node, parent_map)
 
             if current_node in visited:
@@ -95,7 +99,8 @@ class GBFS:
                     heapq.heappush(priority_queue, (neighbor.get_priority(), neighbor))
 
         self._stats_visited_state = len(visited)
-
+        self._stats_num_in_queue = len(priority_queue)
+        self._stats_elasped_time = time.time() - tic
         return None
 
     def _reconstruct_path(self, goal_node, parent_map):
@@ -118,3 +123,5 @@ class GBFS:
 
     def show_algorithm_stats(self):
         print("visited state num:", self._stats_visited_state)
+        print("remaining state num:", self._stats_num_in_queue)
+        print("elasped time:", self._stats_elasped_time)
