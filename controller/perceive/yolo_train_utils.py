@@ -10,5 +10,5 @@ if __name__ == '__main__':
     train_yolo(
         model_path='runs/classify/train/weights/best.pt',
         data_path="zhuan_v1",  # in datasets/...
-        epochs=100
+        epochs=50
     )

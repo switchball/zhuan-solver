@@ -16,28 +16,38 @@ from state.search import GBFS
 class ZhuanReact:
     def __init__(self):
         self._cache_path = None
+        self._total_prob_thres = 0.999 ** (NUM_BOARD_ROWS * NUM_BOARD_COLS)
 
     def run_planning_search(self, start_node):
         gbfs = GBFS(start_node)
         path = gbfs.search()
         gbfs.show_algorithm_stats()
+        if gbfs._stats_visited_state > 10000:
+            t = start_node.state.tiles
+            a = [[int(u) for u in x]for x in t]
+            print((a), "State.Tiles")
+            for node in path:
+                print(node.from_action)
+            # exit()
         return path
 
     def react(self, result: MaybeResult):
-        if result.prob < 0.8:
-            print("识别置信度低于 0.8 跳过响应")
+        if result.prob < self._total_prob_thres:
+            print(f"识别置信度低于 {self._total_prob_thres:.3f} 跳过响应 prob = {result.prob}")
             return NoAction()
         
         initial_state = result.result
         start_node = ZhuanNode(BoardState(initial_state))
 
-        # if self._cache_path is not None:
-        #     print("使用缓存路径")
-        #     path = self._cache_path
-        #     self._cache_path = None
-        #     return path
+        path = None
+        if self._cache_path is not None:
+            if start_node in self._cache_path:
+                idx = self._cache_path.index(start_node)
+                path = self._cache_path[idx:]
+                print(f"从缓存中读取路径位于 {idx} of {len(path)}")
 
-        path = self.run_planning_search(start_node)
+        if path is None:
+            path = self.run_planning_search(start_node)
         if path is None:
             print("未找到路径")
             return NoAction()
@@ -45,6 +55,9 @@ class ZhuanReact:
             self._cache_path = path
         
         # 获取路径的第二个节点的来源动作 （第一个节点是起点）
+        if len(path) < 2:
+            print("已经到达终点")
+            return NoAction()
         action_step = path[1].from_action
         print(f"规划动作: {action_step}")
 

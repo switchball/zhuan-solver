@@ -40,6 +40,9 @@ class ClickAction(GUIAction):
         pyautogui.click(window_x, window_y, clicks=self.clicks, interval=self.interval)
         time.sleep(self.delay)
 
+    def __repr__(self):
+        return f"ClickAction(x={self.x}, y={self.y}, delay={self.delay}, clicks={self.clicks}, interval={self.interval})"
+
 
 class DragAction(GUIAction):
     def __init__(self, start_x: float, start_y: float, end_x: float, end_y: float, delay: float = 0.0, duration: float = 0.5):
@@ -71,6 +74,10 @@ class DragAction(GUIAction):
         pyautogui.moveTo(start_x, start_y)
         pyautogui.dragTo(end_x, end_y, duration=self.duration)
         time.sleep(self.delay)
+
+    def __repr__(self):
+        return f"DragAction(start_x={self.start_x}, start_y={self.start_y}, end_x={self.end_x}, end_y={self.end_y}, delay={self.delay}, duration={self.duration})"
+
 
 # 使用示例
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import time
+import random
 
 from controller.perceive.window_utils import capture_window
 from controller.recognize.base_recognizer import BaseRecognizer
@@ -11,8 +12,8 @@ class CommonController(object):
         self.recognizer : BaseRecognizer = config["recognizer"]
         self.react : BaseReact = config["react"]
 
-        self.frame_seconds = 1
-        self.frame_max_running = 20
+        self.frame_seconds = 1 / config["fps"]
+        self.frame_max_running = config["frame_max_running"]
 
     def main_loop(self):
         tic = time.time()
@@ -23,7 +24,7 @@ class CommonController(object):
         while crt_frame < self.frame_max_running:
             crt_frame += 1
             if (toc := time.time()) < next_tick:
-                time.sleep(next_tick - toc)
+                time.sleep((next_tick - toc) * random.random())
             next_tick = time.time() + self.frame_seconds
             print(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
             try:

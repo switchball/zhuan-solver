@@ -1,2 +1,9 @@
 .vscode
 *.pyc
+__pycache__/
+
+# Images for training
+output_tile*.png
+
+# Yolo training
+runs/
