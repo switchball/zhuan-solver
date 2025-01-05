@@ -36,3 +36,28 @@ def split_image(image_obj: Image, rows, cols):
             tiles.append(tile)
 
     return tiles
+
+def crop_image(image_obj: Image, xywhn: tuple):
+    """
+    根据归一化后的坐标和尺寸裁剪图像。
+    
+    :param image_obj: 原始图像
+    :param xywhn: 归一化后的坐标和尺寸 (x, y, w, h)
+    :return: 裁剪后的图像
+    """
+    # 解包归一化后的坐标和尺寸
+    x, y, w, h = xywhn
+
+    # 获取图像的原始尺寸
+    width, height = image_obj.size
+
+    # 计算实际的坐标和尺寸
+    left = int(x * width)
+    upper = int(y * height)
+    right = int((x + w) * width)
+    lower = int((y + h) * height)
+
+    # 裁剪图像
+    cropped_image = image_obj.crop((left, upper, right, lower))
+
+    return cropped_image
