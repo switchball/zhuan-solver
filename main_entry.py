@@ -5,8 +5,11 @@ from PIL import Image
 
 from app.zhuan.board_state import BoardState
 from app.zhuan.zhuan_node import ZhuanNode
+from app.zhuan.zhuan_recognizer import YOLORecognizer, ZhuanRecognizer
+from app.zhuan.zhuan_react import ZhuanReact
+
+from controller.common_controller import CommonController
 from state.search import BFS, GBFS
-from app.zhuan.yolo_recognizer import YOLORecognizer
 
 
 def random_state():
@@ -30,14 +33,19 @@ def random_state():
 
 def from_image_state():
     rec = YOLORecognizer('runs/classify/train/weights/best.pt')
-    full_image = Image.open("images/image.png")
+    board_image = Image.open("images/image.png")
+    return rec.recognize(board_image)
+
+def zhuan_rec():
+    rec = ZhuanRecognizer('runs/classify/train/weights/best.pt')
+    full_image = Image.open("images/screenshot.png")
     return rec.recognize(full_image)
 
-if __name__ == "__main__":
+def entry_from_local_image():
+    # 旧的入口函数，从本地图片启动测试
     initial_state = [
         [0, 1, 2, 3, 4, 5, 6, 7, 2, 3],
         [0, 0, 0, 0, 0, 0, 0, 0, 9, 8],
-        # ... 其他行 ...
         [0, 0, 2, 3, 4, 5, 6, 7, 8, 9],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -55,19 +63,30 @@ if __name__ == "__main__":
     initial_state = random_state()
 
     initial_state = from_image_state()
-    
+
+    zhuan_result = zhuan_rec()
+    print(zhuan_result)
+    initial_state = zhuan_result.result
     # neighbors = test_node.get_neighbors()
 
     start_node = ZhuanNode(BoardState(initial_state))
-    print(start_node)
-    import time 
-    time.sleep(3)
+
     gbfs = GBFS(start_node)
     path = gbfs.search()
     if path:
         print("找到路径:")
         for node in path:
-            print(node)
+            print(node.from_action)
     else:
         print("未找到路径")
     gbfs.show_algorithm_stats()
+
+
+if __name__ == "__main__":
+    controller = CommonController(config={
+        "window_title": "砖了个砖",
+        "recognizer": ZhuanRecognizer('runs/classify/train/weights/best.pt'),
+        "react": ZhuanReact(),
+    })
+
+    controller.main_loop()

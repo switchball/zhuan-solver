@@ -1,3 +1,4 @@
+from app.zhuan.zhuan_constants import NUM_BOARD_ROWS, NUM_BOARD_COLS
 
 
 class BoardState:
@@ -8,8 +9,8 @@ class BoardState:
         :param initial_state: 可选参数，用于初始化棋盘的状态。
                                如果为 None，则初始化为空棋盘。
         """
-        self.rows = 14
-        self.cols = 10
+        self.rows = NUM_BOARD_ROWS
+        self.cols = NUM_BOARD_COLS
         if initial_state is None:
             # 初始化为空棋盘
             self.tiles = [[0 for _ in range(self.cols)] for _ in range(self.rows)]

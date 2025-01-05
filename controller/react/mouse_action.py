@@ -5,6 +5,13 @@ import time
 from controller.react.gui_action import GUIAction
 
 
+class NoAction(GUIAction):
+    """不执行任何动作"""
+
+    def execute(self, coords):
+        pass
+
+
 class ClickAction(GUIAction):
     def __init__(self, x: float, y: float, delay: float = 0.0, clicks: int = 1, interval: float = 0.0):
         """
