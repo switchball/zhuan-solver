@@ -1,4 +1,5 @@
 import math
+import time
 
 from app.zhuan.board_state import BoardState
 from app.zhuan.zhuan_node import ZhuanNode
@@ -6,6 +7,7 @@ from app.zhuan.zhuan_constants import (
     BOARD_AREA_POSITION,
     NUM_BOARD_ROWS,
     NUM_BOARD_COLS,
+    EACH_TILE_CONFIDENCE,
 )
 
 from controller.recognize.maybe_result import MaybeResult
@@ -16,7 +18,10 @@ from state.search import GBFS
 class ZhuanReact:
     def __init__(self):
         self._cache_path = None
-        self._total_prob_thres = 0.999 ** (NUM_BOARD_ROWS * NUM_BOARD_COLS)
+        self._total_prob_thres = EACH_TILE_CONFIDENCE ** (NUM_BOARD_ROWS * NUM_BOARD_COLS)
+        self._missing_cache_wait_max = 5
+        self._missing_cache_wait_crt = 0
+        self._cache_hit_idx = 0
 
     def run_planning_search(self, start_node):
         gbfs = GBFS(start_node)
@@ -26,8 +31,9 @@ class ZhuanReact:
             t = start_node.state.tiles
             a = [[int(u) for u in x]for x in t]
             print((a), "State.Tiles")
-            for node in path:
-                print(node.from_action)
+            if path is not None:
+                for node in path:
+                    print(node.from_action)
             # exit()
         return path
 
@@ -45,6 +51,23 @@ class ZhuanReact:
                 idx = self._cache_path.index(start_node)
                 path = self._cache_path[idx:]
                 print(f"从缓存中读取路径位于 {idx} of {len(path)}")
+                self._missing_cache_wait_crt = 0
+                self._cache_hit_idx = 0
+            else:
+                print("路径不在缓存中")
+                self._missing_cache_wait_crt += 1
+                self._cache_hit_idx += 1
+                if self._missing_cache_wait_crt < self._missing_cache_wait_max:
+                    if self._cache_hit_idx + 1 < len(self._cache_path):
+                        action_step = self._cache_path[self._cache_hit_idx + 1].from_action
+                        print(f"  从缓存中读取路径位于 {self._cache_hit_idx} of {len(self._cache_path)}")
+                        return self.build_action(action_step)
+                    return NoAction()
+                elif self._missing_cache_wait_crt == self._missing_cache_wait_max:
+                    print("  等待 1s")
+                    time.sleep(1)
+                    return NoAction()
+                self._missing_cache_wait_crt = 0
 
         if path is None:
             path = self.run_planning_search(start_node)
@@ -62,7 +85,6 @@ class ZhuanReact:
         print(f"规划动作: {action_step}")
 
         normalized_action = self.build_action(action_step)
-        print(f"归一化动作: {normalized_action}")
         return normalized_action
 
     def build_action(self, action_step):

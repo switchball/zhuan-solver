@@ -1,11 +1,17 @@
 import math
 import numpy as np
 import os
+import random
 import time
 from PIL import Image
 from ultralytics import YOLO
 
-from app.zhuan.zhuan_constants import BOARD_AREA_POSITION, NUM_BOARD_ROWS, NUM_BOARD_COLS
+from app.zhuan.zhuan_constants import (
+    BOARD_AREA_POSITION,
+    NUM_BOARD_ROWS,
+    NUM_BOARD_COLS,
+    SHOULD_SAVE_LOW_CONF_IMAGES,
+)
 
 from controller.perceive.split_utils import split_image, crop_image
 from controller.recognize.maybe_result import MaybeResult
@@ -18,7 +24,10 @@ class ZhuanRecognizer:
         self.yolo_recognizer = YOLORecognizer(model_path)
     
     def recognize(self, full_image: Image):
-        board_image = crop_image(full_image, self.board_xywhn)
+        disturb_xywhn = list(self.board_xywhn)
+        # disturb_xywhn[0] += random.random() * 0.02 - 0.01
+        # disturb_xywhn[1] += random.random() * 0.02 - 0.01
+        board_image = crop_image(full_image, disturb_xywhn)
         recognize_result = self.yolo_recognizer.recognize(board_image)
         return MaybeResult(*recognize_result)
 
@@ -32,7 +41,7 @@ class YOLORecognizer:
         rows = NUM_BOARD_ROWS  # 14
         cols = NUM_BOARD_COLS  # 10
         img_list = split_image(full_image, rows=rows, cols=cols)
-        results = self.model.predict(source=img_list, save=False)
+        results = self.model.predict(source=img_list, save=False, verbose=True)
         top_category = [result.probs.top1 for result in results]
         top_confidence = [result.probs.top1conf for result in results]
         recognize_result = np.array(top_category).reshape(rows, cols)
@@ -57,7 +66,9 @@ class YOLORecognizer:
 
         max_limit = int(len(img_list) * limit)
         if len(low_conf_pair) >= max_limit:
-            print(f"超过{max_limit}张({limit*100}%)置信度低于阈值的图片，不再保存以免数据干扰")
+            print(f"有{len(low_conf_pair)}张已超过{max_limit}张({limit*100}%)置信度低于阈值的图片，不再保存以免数据干扰")
             return
         for i, confidence in low_conf_pair:
             img_list[i].save(os.path.join(img_dir, f"addon_{ts}_{i}.png"))
+        if len(low_conf_pair) > 0:
+            print(f"已保存{len(low_conf_pair)}张置信度低于阈值的图片")
