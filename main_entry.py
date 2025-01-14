@@ -85,7 +85,7 @@ def entry_from_local_image():
 if __name__ == "__main__":
     controller = CommonController(config={
         "window_title": "砖了个砖",
-        "recognizer": ZhuanRecognizer('runs/classify/train2/weights/best.pt'),
+        "recognizer": ZhuanRecognizer('runs/classify/train/weights/best.pt'),
         "react": ZhuanReact(),
         "fps": 4,
         "frame_max_running": 1500
