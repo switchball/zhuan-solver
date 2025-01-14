@@ -26,7 +26,7 @@ class CommonController(object):
             if (toc := time.time()) < next_tick:
                 time.sleep((next_tick - toc) * random.random())
             next_tick = time.time() + self.frame_seconds
-            print(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+            print(f"\n{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
             try:
                 # perceive
                 coords, screenshot = capture_window(self.window_title)

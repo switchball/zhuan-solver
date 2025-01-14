@@ -62,7 +62,7 @@ def entry_from_local_image():
 
     initial_state = random_state()
 
-    initial_state = from_image_state()
+    initial_state = from_image_state()[0]
 
     zhuan_result = zhuan_rec()
     print(zhuan_result)
@@ -87,8 +87,8 @@ if __name__ == "__main__":
         "window_title": "砖了个砖",
         "recognizer": ZhuanRecognizer('runs/classify/train2/weights/best.pt'),
         "react": ZhuanReact(),
-        "fps": 2,
-        "frame_max_running": 150
+        "fps": 4,
+        "frame_max_running": 1500
     })
 
     controller.main_loop()

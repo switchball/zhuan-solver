@@ -4,6 +4,10 @@ __pycache__/
 
 # Images for training
 output_tile*.png
+addon_*.png
+
+*.cache
+*.zip
 
 # Yolo training
 runs/
